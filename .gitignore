@@ -1,0 +1,9 @@
+/target
+/bin
+/obj
+Cargo.lock
+*.pdb
+*.exe
+*.db
+navigator.db
+

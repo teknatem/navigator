@@ -1,0 +1,11 @@
+[package]
+name = "navigator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eframe = "0.29"
+egui = "0.29"
+egui_dock = "0.14"
+rusqlite = { version = "0.32", features = ["bundled"] }
+
