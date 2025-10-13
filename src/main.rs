@@ -1,13 +1,16 @@
 use eframe::egui;
 use egui_dock::{DockArea, DockState, NodeIndex, Style, TabViewer};
-use rusqlite::{Connection, Result as SqlResult};
-use std::path::Path;
+use rusqlite::Connection;
 
 mod app_settings;
 mod layout;
+mod domain;
+mod shared;
 
 use app_settings::AppSettings;
 use layout::{MenuBar, SettingsForm, Theme};
+use shared::db as shared_db;
+use domain::n001_project::ui::list::{ui_projects_list, ProjectsListState};
 
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
@@ -34,6 +37,8 @@ struct MyApp {
     db_items: Vec<(i32, String)>,
     new_item_name: String,
     db_status: String,
+    // n001_project UI state
+    projects_state: ProjectsListState,
     // Меню и настройки
     menu_bar: MenuBar,
     settings_form: SettingsForm,
@@ -41,8 +46,16 @@ struct MyApp {
 }
 
 impl MyApp {
+    fn open_projects_tab(&mut self) {
+        // Ensure a Projects tab exists by pushing one to the focused leaf.
+        // If one already exists, this will add another; acceptable for now.
+        self
+            .dock_state
+            .main_surface_mut()
+            .push_to_focused_leaf("Projects".to_string());
+    }
     fn new() -> Self {
-        let mut dock_state = DockState::new(vec!["Tab 1".to_string()]);
+        let mut dock_state = DockState::new(vec!["Projects".to_string()]);
 
         // Добавляем дополнительные вкладки
         let [_a, b] = dock_state.main_surface_mut().split_right(
@@ -60,26 +73,9 @@ impl MyApp {
             .split_below(c, 0.5, vec!["Database".to_string()]);
 
         // Инициализация базы данных
-        let db_path = "navigator.db";
-        let db_exists = Path::new(db_path).exists();
-
-        if db_exists {
-            println!("Database found: {}", db_path);
-        } else {
-            println!("Database not found. Creating new database: {}", db_path);
-        }
-
-        let db_connection = Connection::open(db_path).expect("Failed to open/create database");
-
-        if !db_exists {
-            println!("Initializing database tables...");
-        }
-
-        Self::init_database(&db_connection).expect("Failed to initialize database");
-
-        if !db_exists {
-            println!("Database created successfully with all tables");
-        }
+        // Open or create database and ensure schema
+        let db_connection = shared_db::open_or_create(shared_db::DB_PATH)
+            .expect("Failed to open/create database");
 
         // Загрузка настроек из базы данных
         let saved_settings = AppSettings::load_from_db(&db_connection).unwrap_or_else(|_| {
@@ -98,29 +94,14 @@ impl MyApp {
             menu_bar: MenuBar::new(),
             settings_form: SettingsForm::new_with_settings(&saved_settings),
             first_frame: true,
+            projects_state: ProjectsListState::default(),
         };
 
         app.load_items();
         app
     }
 
-    fn init_database(conn: &Connection) -> SqlResult<()> {
-        // Create items table
-        conn.execute(
-            "CREATE TABLE IF NOT EXISTS items (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL
-            )",
-            [],
-        )?;
-        println!("  ✓ Table 'items' initialized");
-
-        // Create settings table
-        AppSettings::init_table(conn)?;
-        println!("  ✓ Table 'settings' initialized");
-
-        Ok(())
-    }
+    
 
     fn load_items(&mut self) {
         self.db_items.clear();
@@ -171,6 +152,7 @@ impl eframe::App for MyApp {
             db_items,
             new_item_name,
             db_status,
+            projects_state,
             ..
         } = self;
 
@@ -185,6 +167,7 @@ impl eframe::App for MyApp {
                     db_items,
                     new_item_name,
                     db_status,
+                    projects_state,
                 },
             );
     }
@@ -219,7 +202,7 @@ impl MyApp {
     }
 
     fn handle_menu_actions(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        use layout::menu_bar::{EditAction, FileAction, HelpAction, SettingsAction, ViewAction};
+        use layout::menu_bar::{AggregatesAction, EditAction, FileAction, HelpAction, SettingsAction, ViewAction};
 
         // Обработка File menu
         if let Some(action) = self.menu_bar.file_action {
@@ -325,6 +308,16 @@ impl MyApp {
             }
         }
 
+        // Aggregates menu
+        if let Some(action) = self.menu_bar.aggregates_action {
+            match action {
+                AggregatesAction::Projects => {
+                    self.open_projects_tab();
+                    self.db_status = "Открыт список проектов".to_string();
+                }
+            }
+        }
+
         // Обработка Help menu
         if let Some(action) = self.menu_bar.help_action {
             match action {
@@ -415,6 +408,7 @@ struct MyTabViewer<'a> {
     db_items: &'a mut Vec<(i32, String)>,
     new_item_name: &'a mut String,
     db_status: &'a mut String,
+    projects_state: &'a mut ProjectsListState,
 }
 
 impl<'a> TabViewer for MyTabViewer<'a> {
@@ -429,6 +423,9 @@ impl<'a> TabViewer for MyTabViewer<'a> {
         ui.separator();
 
         match tab.as_str() {
+            "Projects" => {
+                ui_projects_list(ui, self.db_connection, self.projects_state);
+            }
             "Tab 1" => {
                 ui.label("Это первая вкладка");
                 ui.add_space(10.0);
@@ -565,3 +562,4 @@ impl<'a> MyTabViewer<'a> {
         *self.db_status = "Список обновлён".to_string();
     }
 }
+

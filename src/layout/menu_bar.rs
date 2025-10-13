@@ -6,6 +6,7 @@ pub struct MenuBar {
     pub view_action: Option<ViewAction>,
     pub settings_action: Option<SettingsAction>,
     pub help_action: Option<HelpAction>,
+    pub aggregates_action: Option<AggregatesAction>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -47,6 +48,11 @@ pub enum HelpAction {
     Documentation,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum AggregatesAction {
+    Projects,
+}
+
 impl Default for MenuBar {
     fn default() -> Self {
         Self::new()
@@ -61,6 +67,7 @@ impl MenuBar {
             view_action: None,
             settings_action: None,
             help_action: None,
+            aggregates_action: None,
         }
     }
 
@@ -161,6 +168,14 @@ impl MenuBar {
                     }
                 });
 
+                // Aggregates menu
+                ui.menu_button("Aggregates", |ui| {
+                    if ui.button("Projects").clicked() {
+                        self.aggregates_action = Some(AggregatesAction::Projects);
+                        ui.close_menu();
+                    }
+                });
+
                 // Help menu
                 ui.menu_button("Справка", |ui| {
                     if ui.button("📖 Документация").clicked() {
@@ -182,5 +197,6 @@ impl MenuBar {
         self.view_action = None;
         self.settings_action = None;
         self.help_action = None;
+        self.aggregates_action = None;
     }
 }
