@@ -1,6 +1,6 @@
 use eframe::egui;
 use egui_extras::{Column, TableBuilder};
-use egui::{Color32, Stroke, Vec2, RichText};
+use egui::{Color32, Stroke, Vec2, RichText, TextStyle};
 use rusqlite::Connection;
 
 use crate::domain::n001_project::model::Project;
@@ -44,11 +44,30 @@ pub fn ui_projects_list(ui: &mut egui::Ui, conn: &Connection, state: &mut Projec
         }
     };
 
+    // Ensure table uses full available width and recomputes each frame
+    ui.set_width(ui.available_width());
+
+    // Font sizes (20% smaller)
+    let heading_base = ui
+        .style()
+        .text_styles
+        .get(&TextStyle::Heading)
+        .map(|f| f.size)
+        .unwrap_or(18.0);
+    let body_base = ui
+        .style()
+        .text_styles
+        .get(&TextStyle::Body)
+        .map(|f| f.size)
+        .unwrap_or(14.0);
+    let header_size = heading_base * 0.8;
+    let row_size = body_base * 0.8;
+
     // Table: 1 row = 1 item; with headers and dark horizontal lines
     TableBuilder::new(ui)
         .striped(true)
         .resizable(true)
-        .column(Column::auto()) // Name
+        .column(Column::remainder()) // Name
         .column(Column::remainder()) // Path
         .column(Column::remainder()) // Description
         .column(Column::auto()) // Actions
@@ -56,34 +75,34 @@ pub fn ui_projects_list(ui: &mut egui::Ui, conn: &Connection, state: &mut Projec
             header.col(|ui| {
                 let rect = ui.max_rect();
                 ui.painter().rect_filled(rect, 0.0, Color32::from_gray(45));
-                ui.label(RichText::new("Name").heading());
+                ui.label(RichText::new("Name").size(header_size));
             });
             header.col(|ui| {
                 let rect = ui.max_rect();
                 ui.painter().rect_filled(rect, 0.0, Color32::from_gray(45));
-                ui.label(RichText::new("Path").heading());
+                ui.label(RichText::new("Path").size(header_size));
             });
             header.col(|ui| {
                 let rect = ui.max_rect();
                 ui.painter().rect_filled(rect, 0.0, Color32::from_gray(45));
-                ui.label(RichText::new("Description").heading());
+                ui.label(RichText::new("Description").size(header_size));
             });
             header.col(|ui| {
                 let rect = ui.max_rect();
                 ui.painter().rect_filled(rect, 0.0, Color32::from_gray(45));
-                ui.label(RichText::new("Actions").heading());
+                ui.label(RichText::new("Actions").size(header_size));
             });
         })
         .body(|mut body| {
             for p in projects.iter() {
                 let id = p.id;
                 body.row(26.0, |mut row| {
-                    row.col(|ui| { ui.label(RichText::new(&p.name).heading()); });
-                    row.col(|ui| { ui.label(RichText::new(&p.root_path).heading()); });
+                    row.col(|ui| { ui.label(RichText::new(&p.name).size(row_size)); });
+                    row.col(|ui| { ui.label(RichText::new(&p.root_path).size(row_size)); });
                     row.col(|ui| {
                         let desc = p.description.as_deref().unwrap_or("");
                         let short = if desc.len() > 80 { format!("{}…", &desc[..80]) } else { desc.to_string() };
-                        ui.label(RichText::new(short).heading());
+                        ui.label(RichText::new(short).size(row_size));
                     });
                     row.col(|ui| {
                         ui.horizontal(|ui| {
