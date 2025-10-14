@@ -89,17 +89,15 @@ pub fn ui_project_picker(
                         if is_selected {
                             label = label.strong();
                         }
-                        let row = ui.selectable_label(is_selected, label);
+                        let response = ui.selectable_label(is_selected, label);
+                        let clicked = response.clicked();
+                        let double_clicked = response.double_clicked();
+                        // optional: could show tooltip here if desired
 
-                        // show extra info smaller
-                        if row.hovered() {
-                            row.on_hover_text(format!("{}\n{}", p.root_path, p.description.clone().unwrap_or_default()));
-                        }
-
-                        if row.clicked() {
+                        if clicked {
                             state.selected_id = Some(p.id);
                         }
-                        if row.double_clicked() {
+                        if double_clicked {
                             state.selected_id = Some(p.id);
                             result = state.selected_id;
                         }
@@ -125,10 +123,8 @@ pub fn ui_project_picker(
                 if ui.button("Cancel").clicked() {
                     state.selected_id = None;
                     result = None;
-                    // close the window below
-                    // (handled by open = false)
                     state.status.clear();
-                    open = false;
+                    state.open = false;
                 }
             });
         });
@@ -144,4 +140,3 @@ pub fn ui_project_picker(
 
     None
 }
-

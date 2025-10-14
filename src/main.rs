@@ -11,6 +11,7 @@ use app_settings::AppSettings;
 use layout::{MenuBar, SettingsForm, Theme};
 use shared::db as shared_db;
 use domain::n001_project::ui::list::{ui_projects_list, ProjectsListState};
+use domain::n002_snapshot::ui::list::{ui_snapshots_list, SnapshotsListState};
 
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
@@ -39,6 +40,7 @@ struct MyApp {
     db_status: String,
     // n001_project UI state
     projects_state: ProjectsListState,
+    snapshots_state: SnapshotsListState,
     // Меню и настройки
     menu_bar: MenuBar,
     settings_form: SettingsForm,
@@ -54,7 +56,12 @@ impl MyApp {
             .main_surface_mut()
             .push_to_focused_leaf("Projects".to_string());
     }
-    fn new() -> Self {
+    fn open_snapshots_tab(&mut self) {
+        self
+            .dock_state
+            .main_surface_mut()
+            .push_to_focused_leaf("Snapshots".to_string());
+    }fn new() -> Self {
         let mut dock_state = DockState::new(vec!["Projects".to_string()]);
 
         // Добавляем дополнительные вкладки
@@ -95,6 +102,7 @@ impl MyApp {
             settings_form: SettingsForm::new_with_settings(&saved_settings),
             first_frame: true,
             projects_state: ProjectsListState::default(),
+            snapshots_state: SnapshotsListState::default(),
         };
 
         app.load_items();
@@ -153,6 +161,7 @@ impl eframe::App for MyApp {
             new_item_name,
             db_status,
             projects_state,
+            snapshots_state,
             ..
         } = self;
 
@@ -168,6 +177,7 @@ impl eframe::App for MyApp {
                     new_item_name,
                     db_status,
                     projects_state,
+                    snapshots_state,
                 },
             );
     }
@@ -313,7 +323,11 @@ impl MyApp {
             match action {
                 AggregatesAction::Projects => {
                     self.open_projects_tab();
-                    self.db_status = "Открыт список проектов".to_string();
+                    self.db_status = "Opened Projects tab".to_string();
+                }
+                AggregatesAction::Snapshots => {
+                    self.open_snapshots_tab();
+                    self.db_status = "Opened Snapshots tab".to_string();
                 }
             }
         }
@@ -409,6 +423,7 @@ struct MyTabViewer<'a> {
     new_item_name: &'a mut String,
     db_status: &'a mut String,
     projects_state: &'a mut ProjectsListState,
+    snapshots_state: &'a mut SnapshotsListState,
 }
 
 impl<'a> TabViewer for MyTabViewer<'a> {
@@ -425,6 +440,8 @@ impl<'a> TabViewer for MyTabViewer<'a> {
         match tab.as_str() {
             "Projects" => {
                 ui_projects_list(ui, self.db_connection, self.projects_state);
+            }            "Snapshots" => {
+                ui_snapshots_list(ui, self.db_connection, self.snapshots_state);
             }
             "Tab 1" => {
                 ui.label("Это первая вкладка");
@@ -562,4 +579,19 @@ impl<'a> MyTabViewer<'a> {
         *self.db_status = "Список обновлён".to_string();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

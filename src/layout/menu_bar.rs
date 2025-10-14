@@ -51,6 +51,7 @@ pub enum HelpAction {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum AggregatesAction {
     Projects,
+    Snapshots,
 }
 
 impl Default for MenuBar {
@@ -174,6 +175,10 @@ impl MenuBar {
                         self.aggregates_action = Some(AggregatesAction::Projects);
                         ui.close_menu();
                     }
+                    if ui.button("Snapshots").clicked() {
+                        self.aggregates_action = Some(AggregatesAction::Snapshots);
+                        ui.close_menu();
+                    }
                 });
 
                 // Help menu
@@ -200,3 +205,5 @@ impl MenuBar {
         self.aggregates_action = None;
     }
 }
+
+
