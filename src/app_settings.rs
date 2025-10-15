@@ -5,6 +5,7 @@ use rusqlite::{Connection, Result as SqlResult};
 pub struct AppSettings {
     pub theme: Theme,
     pub zoom: f32,
+    pub navbar_width_frac: f32,
 }
 
 impl Default for AppSettings {
@@ -12,6 +13,7 @@ impl Default for AppSettings {
         Self {
             theme: Theme::Dark,
             zoom: 1.0,
+            navbar_width_frac: 0.20,
         }
     }
 }
@@ -49,6 +51,14 @@ impl AppSettings {
             }
         }
 
+        // Load navbar width (fraction of screen width)
+        if let Ok(w_str) = Self::get_value(conn, "navbar_width_frac") {
+            if let Ok(w) = w_str.parse::<f32>() {
+                settings.navbar_width_frac = w.clamp(0.10, 0.50);
+            }
+        }
+
+
         println!(
             "Settings loaded from database: Theme={:?}, Zoom={:.0}%",
             settings.theme,
@@ -69,10 +79,14 @@ impl AppSettings {
         // Save zoom
         Self::set_value(conn, "zoom", &self.zoom.to_string())?;
 
+        // Save navbar width (fraction)
+        Self::set_value(conn, "navbar_width_frac", &self.navbar_width_frac.to_string())?;
+
         println!(
-            "Settings saved to database: Theme={:?}, Zoom={:.0}%",
+            "Settings saved to database: Theme={:?}, Zoom={:.0}%, NavbarWidth={:.0}%",
             self.theme,
-            self.zoom * 100.0
+            self.zoom * 100.0,
+            self.navbar_width_frac * 100.0
         );
         Ok(())
     }

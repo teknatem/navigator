@@ -185,7 +185,10 @@ pub fn ui_snapshots_list(ui: &mut egui::Ui, conn: &Connection, state: &mut Snaps
     // Create snapshot window
     if state.show_create {
         let mut open = true;
-        egui::Window::new("Add Snapshot").open(&mut open).show(ui.ctx(), |ui| {
+        egui::Window::new("Add Snapshot")
+            .id(egui::Id::new("n002_add_snapshot"))
+            .open(&mut open)
+            .show(ui.ctx(), |ui| {
             details_form(ui, conn, &mut state.project_picker, &mut state.create_details);
             ui.add_space(6.0);
             ui.horizontal(|ui| {
@@ -224,7 +227,10 @@ pub fn ui_snapshots_list(ui: &mut egui::Ui, conn: &Connection, state: &mut Snaps
     // View snapshot window
     if state.show_view {
         let mut open = true;
-        egui::Window::new("View Snapshot").open(&mut open).show(ui.ctx(), |ui| {
+        egui::Window::new("View Snapshot")
+            .id(egui::Id::new("n002_view_snapshot"))
+            .open(&mut open)
+            .show(ui.ctx(), |ui| {
             let pname = project_names
                 .get(&state.view_details.project_id)
                 .map(|s| s.as_str())
@@ -246,7 +252,10 @@ pub fn ui_snapshots_list(ui: &mut egui::Ui, conn: &Connection, state: &mut Snaps
     // Edit snapshot window
     if state.show_edit {
         let mut open = true;
-        egui::Window::new("Edit Snapshot").open(&mut open).show(ui.ctx(), |ui| {
+        egui::Window::new("Edit Snapshot")
+            .id(egui::Id::new("n002_edit_snapshot"))
+            .open(&mut open)
+            .show(ui.ctx(), |ui| {
             details_form(ui, conn, &mut state.project_picker, &mut state.edit_details);
             ui.add_space(6.0);
             ui.horizontal(|ui| {

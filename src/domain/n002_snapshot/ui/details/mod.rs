@@ -78,16 +78,16 @@ pub fn details_form(
 
     ui.horizontal(|ui| {
         ui.label("Files:");
-        ui.add(egui::DragValue::new(&mut state.files_count).clamp_range(0..=i64::MAX));
+        ui.add(egui::DragValue::new(&mut state.files_count).range(0..=i64::MAX));
         ui.label("Dirs:");
-        ui.add(egui::DragValue::new(&mut state.dirs_count).clamp_range(0..=i64::MAX));
+        ui.add(egui::DragValue::new(&mut state.dirs_count).range(0..=i64::MAX));
     });
 
     ui.horizontal(|ui| {
         ui.label("Size(bytes):");
-        ui.add(egui::DragValue::new(&mut state.files_size_bytes).clamp_range(0..=i64::MAX));
+        ui.add(egui::DragValue::new(&mut state.files_size_bytes).range(0..=i64::MAX));
         ui.label("LOC:");
-        ui.add(egui::DragValue::new(&mut state.loc_count).clamp_range(0..=i64::MAX));
+        ui.add(egui::DragValue::new(&mut state.loc_count).range(0..=i64::MAX));
     });
 
     ui.horizontal(|ui| {

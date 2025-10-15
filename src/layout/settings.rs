@@ -11,9 +11,11 @@ pub struct SettingsForm {
     // Temporary values (before Apply)
     temp_theme: Theme,
     temp_zoom: f32,
+    temp_navbar_width_frac: f32,
     // Applied values
     pub current_theme: Theme,
     pub current_zoom: f32,
+    pub current_navbar_width_frac: f32,
 }
 
 impl Default for SettingsForm {
@@ -28,8 +30,10 @@ impl SettingsForm {
             is_open: false,
             temp_theme: Theme::Dark,
             temp_zoom: 1.0,
+            temp_navbar_width_frac: 0.20,
             current_theme: Theme::Dark,
             current_zoom: 1.0,
+            current_navbar_width_frac: 0.20,
         }
     }
 
@@ -38,8 +42,10 @@ impl SettingsForm {
             is_open: false,
             temp_theme: settings.theme,
             temp_zoom: settings.zoom,
+            temp_navbar_width_frac: settings.navbar_width_frac,
             current_theme: settings.theme,
             current_zoom: settings.zoom,
+            current_navbar_width_frac: settings.navbar_width_frac,
         }
     }
 
@@ -110,6 +116,27 @@ impl SettingsForm {
 
                 ui.add_space(20.0);
 
+                // Navbar width
+                ui.group(|ui| {
+                    ui.label("Navbar Width:");
+                    ui.add_space(5.0);
+
+                    let mut pct = (self.temp_navbar_width_frac * 100.0).round();
+                    ui.horizontal(|ui| {
+                        ui.label(format!("{:.0}%", pct));
+                        ui.add_space(10.0);
+                        let range = 10.0..=50.0;
+                        if ui
+                            .add(egui::Slider::new(&mut pct, range).show_value(false))
+                            .changed()
+                        {
+                            self.temp_navbar_width_frac = (pct / 100.0) as f32;
+                        }
+                    });
+                });
+
+                ui.add_space(20.0);
+
                 // Action buttons
                 ui.separator();
                 ui.add_space(10.0);
@@ -118,6 +145,7 @@ impl SettingsForm {
                     if ui.button("✓ Apply").clicked() {
                         self.current_theme = self.temp_theme;
                         self.current_zoom = self.temp_zoom;
+                        self.current_navbar_width_frac = self.temp_navbar_width_frac;
                         settings_changed = true;
                         should_close = true;
                     }
@@ -128,6 +156,7 @@ impl SettingsForm {
                         // Revert temporary changes
                         self.temp_theme = self.current_theme;
                         self.temp_zoom = self.current_zoom;
+                        self.temp_navbar_width_frac = self.current_navbar_width_frac;
                         should_close = true;
                     }
                 });
@@ -151,3 +180,12 @@ impl SettingsForm {
         self.current_zoom
     }
 }
+
+impl SettingsForm {
+    pub fn get_navbar_width_frac(&self) -> f32 { self.current_navbar_width_frac }
+    pub fn set_current_navbar_width_frac(&mut self, frac: f32) {
+        self.current_navbar_width_frac = frac.clamp(0.10, 0.50);
+        self.temp_navbar_width_frac = self.current_navbar_width_frac;
+    }
+}
+

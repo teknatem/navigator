@@ -160,7 +160,10 @@ pub fn ui_projects_list(ui: &mut egui::Ui, conn: &Connection, state: &mut Projec
     // Create project window
     if state.show_create {
         let mut open = true;
-        egui::Window::new("Add Project").open(&mut open).show(ui.ctx(), |ui| {
+        egui::Window::new("Add Project")
+            .id(egui::Id::new("n001_add_project"))
+            .open(&mut open)
+            .show(ui.ctx(), |ui| {
             details_form(ui, &mut state.create_details);
             ui.add_space(6.0);
             ui.horizontal(|ui| {
@@ -198,7 +201,10 @@ pub fn ui_projects_list(ui: &mut egui::Ui, conn: &Connection, state: &mut Projec
     // View project window
     if state.show_view {
         let mut open = true;
-        egui::Window::new("View Project").open(&mut open).show(ui.ctx(), |ui| {
+        egui::Window::new("View Project")
+            .id(egui::Id::new("n001_view_project"))
+            .open(&mut open)
+            .show(ui.ctx(), |ui| {
             ui.label(format!("Name: {}", state.view_details.name));
             ui.label(format!("Root Path: {}", state.view_details.root_path));
             ui.label(format!("Description: {}", state.view_details.description));
@@ -215,7 +221,10 @@ pub fn ui_projects_list(ui: &mut egui::Ui, conn: &Connection, state: &mut Projec
     // Edit project window
     if state.show_edit {
         let mut open = true;
-        egui::Window::new("Edit Project").open(&mut open).show(ui.ctx(), |ui| {
+        egui::Window::new("Edit Project")
+            .id(egui::Id::new("n001_edit_project"))
+            .open(&mut open)
+            .show(ui.ctx(), |ui| {
             details_form(ui, &mut state.edit_details);
             ui.add_space(6.0);
             ui.horizontal(|ui| {
