@@ -6,6 +6,105 @@ use super::gitignore::GitignoreParser;
 use crate::domain::n002_snapshot::repository as snapshot_repo;
 use crate::domain::n003_snapshot_file::repository as file_repo;
 
+/// Extract file extension from filename
+fn extract_file_extension(name: &str) -> Option<String> {
+    if let Some(dot_pos) = name.rfind('.') {
+        let ext = &name[dot_pos + 1..];
+        if !ext.is_empty() {
+            return Some(ext.to_string());
+        }
+    }
+    None
+}
+
+/// Extract crate layer from path (backend, frontend, contracts)
+fn extract_crate_layer(path: &str) -> Option<String> {
+    let path_lower = path.to_lowercase().replace('\\', "/");
+
+    if path_lower.contains("crates/backend") || path_lower.contains("crates\\backend") {
+        return Some("backend".to_string());
+    }
+    if path_lower.contains("crates/frontend") || path_lower.contains("crates\\frontend") {
+        return Some("frontend".to_string());
+    }
+    if path_lower.contains("crates/contracts") || path_lower.contains("crates\\contracts") {
+        return Some("contracts".to_string());
+    }
+
+    None
+}
+
+/// Extract artifact type from path (domain, usecase, shared)
+fn extract_artifact_type(path: &str) -> Option<String> {
+    let path_normalized = path.replace('\\', "/");
+
+    if path_normalized.contains("/domain/") {
+        return Some("domain".to_string());
+    }
+    if path_normalized.contains("/usecases/") {
+        return Some("usecase".to_string());
+    }
+    if path_normalized.contains("/shared/") {
+        return Some("shared".to_string());
+    }
+
+    None
+}
+
+/// Extract artifact id and name from path (e.g., "n001_project" -> id: "n001_", name: "project")
+fn extract_artifact_id_name(path: &str) -> (Option<String>, Option<String>) {
+    let path_normalized = path.replace('\\', "/");
+    let segments: Vec<&str> = path_normalized.split('/').collect();
+
+    for segment in segments {
+        // Look for patterns like n001_, s501_, etc.
+        if let Some(underscore_pos) = segment.find('_') {
+            let prefix = &segment[..=underscore_pos];
+
+            // Check if prefix matches pattern: letter(s) + digits + underscore
+            let chars: Vec<char> = prefix.chars().collect();
+            if chars.len() >= 3 {
+                let has_letter_start = chars[0].is_alphabetic();
+                let has_digits = chars.iter().skip(1).take_while(|c| c.is_numeric()).count() > 0;
+                let ends_with_underscore = chars.last() == Some(&'_');
+
+                if has_letter_start && has_digits && ends_with_underscore {
+                    let id = prefix.to_string();
+                    let name = segment[underscore_pos + 1..].to_string();
+                    return (Some(id), Some(name));
+                }
+            }
+        }
+    }
+
+    (None, None)
+}
+
+/// Extract role from path and filename
+fn extract_role(path: &str, filename: &str, is_directory: bool) -> Option<String> {
+    if is_directory {
+        return None;
+    }
+
+    // Check if any parent directory is named "ui"
+    let path_normalized = path.replace('\\', "/");
+    let segments: Vec<&str> = path_normalized.split('/').collect();
+
+    for segment in &segments {
+        if *segment == "ui" {
+            return Some("ui".to_string());
+        }
+    }
+
+    // Check filename patterns
+    match filename {
+        "model.rs" => Some("model".to_string()),
+        "repository.rs" => Some("repository".to_string()),
+        "service.rs" => Some("service".to_string()),
+        _ => None,
+    }
+}
+
 pub struct ScanProgress {
     pub files_scanned: usize,
     pub dirs_scanned: usize,
@@ -138,6 +237,17 @@ where
             metadata.len() as i64
         };
 
+        // Parse metadata
+        let file_extension = if !is_directory {
+            extract_file_extension(&name)
+        } else {
+            None
+        };
+        let crate_layer = extract_crate_layer(&rel_path);
+        let artifact_type = extract_artifact_type(&rel_path);
+        let (artifact_id, artifact_name) = extract_artifact_id_name(&rel_path);
+        let role = extract_role(&rel_path, &name, is_directory);
+
         // Insert record into database
         let file_id = file_repo::create(
             conn,
@@ -147,6 +257,12 @@ where
             &rel_path,
             size_bytes,
             is_directory,
+            file_extension.as_deref(),
+            crate_layer.as_deref(),
+            artifact_type.as_deref(),
+            artifact_id.as_deref(),
+            artifact_name.as_deref(),
+            role.as_deref(),
         )
         .map_err(|e| format!("Failed to insert file record: {}", e))?;
 

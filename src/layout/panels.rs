@@ -4,7 +4,7 @@ use rusqlite::Connection;
 
 use crate::domain::n001_project::ui::list::{ui_projects_list, ProjectsListState};
 use crate::domain::n002_snapshot::ui::list::{ui_snapshots_list, SnapshotsListState};
-use crate::domain::n003_snapshot_file::ui::tree_view::{ui_tree_view, TreeViewState};
+use crate::domain::n003_snapshot_file::ui::list::{ui_list, ListState};
 use crate::usecases::s501_create_snapshot::{ui_scan_snapshot, ScanSnapshotState};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -30,7 +30,7 @@ pub struct DualTabViewer<'a> {
     pub db_connection: &'a Connection,
     pub projects_state: &'a mut ProjectsListState,
     pub snapshots_state: &'a mut SnapshotsListState,
-    pub snapshot_files_state: &'a mut TreeViewState,
+    pub snapshot_files_state: &'a mut ListState,
     pub scan_snapshot_state: &'a mut ScanSnapshotState,
 }
 
@@ -53,7 +53,7 @@ impl<'a> TabViewer for DualTabViewer<'a> {
             }
             AppTab::SnapshotFiles => {
                 ui.heading("Snapshot Files");
-                ui_tree_view(ui, self.db_connection, self.snapshot_files_state);
+                ui_list(ui, self.db_connection, self.snapshot_files_state);
             }
             AppTab::ScanSnapshot => {
                 ui_scan_snapshot(ui, self.db_connection, self.scan_snapshot_state);

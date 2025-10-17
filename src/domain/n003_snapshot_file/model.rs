@@ -8,6 +8,12 @@ pub struct SnapshotFile {
     pub path: String,
     pub size_bytes: i64,
     pub is_directory: bool,
+    pub file_extension: Option<String>,
+    pub crate_layer: Option<String>,
+    pub artifact_type: Option<String>,
+    pub artifact_id: Option<String>,
+    pub artifact_name: Option<String>,
+    pub role: Option<String>,
 }
 
 impl SnapshotFile {
@@ -20,6 +26,12 @@ impl SnapshotFile {
         path: String,
         size_bytes: i64,
         is_directory: bool,
+        file_extension: Option<String>,
+        crate_layer: Option<String>,
+        artifact_type: Option<String>,
+        artifact_id: Option<String>,
+        artifact_name: Option<String>,
+        role: Option<String>,
     ) -> Self {
         Self {
             id,
@@ -29,6 +41,12 @@ impl SnapshotFile {
             path,
             size_bytes,
             is_directory,
+            file_extension,
+            crate_layer,
+            artifact_type,
+            artifact_id,
+            artifact_name,
+            role,
         }
     }
 }

@@ -5,7 +5,7 @@ use rusqlite::Connection;
 use super::panels::{AppTab, DualTabViewer};
 use crate::domain::n001_project::ui::list::ProjectsListState;
 use crate::domain::n002_snapshot::ui::list::SnapshotsListState;
-use crate::domain::n003_snapshot_file::ui::tree_view::TreeViewState;
+use crate::domain::n003_snapshot_file::ui::list::ListState;
 use crate::usecases::s501_create_snapshot::ScanSnapshotState;
 
 pub struct CentralPanel;
@@ -18,7 +18,7 @@ impl CentralPanel {
         db_connection: &Connection,
         projects_state: &mut ProjectsListState,
         snapshots_state: &mut SnapshotsListState,
-        snapshot_files_state: &mut TreeViewState,
+        snapshot_files_state: &mut ListState,
         scan_snapshot_state: &mut ScanSnapshotState,
     ) {
         egui::CentralPanel::default().show(ctx, |ui| {

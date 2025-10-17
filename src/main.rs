@@ -13,7 +13,7 @@ mod usecases;
 use app_settings::AppSettings;
 use domain::n001_project::ui::list::ProjectsListState;
 use domain::n002_snapshot::ui::list::SnapshotsListState;
-use domain::n003_snapshot_file::ui::tree_view::TreeViewState;
+use domain::n003_snapshot_file::ui::list::ListState;
 use layout::{AppTab, CentralPanel, MenuBar, SettingsForm, SidePanel};
 use usecases::s501_create_snapshot::ScanSnapshotState;
 
@@ -43,7 +43,7 @@ struct MyApp {
     // Domain UI states
     projects_state: ProjectsListState,
     snapshots_state: SnapshotsListState,
-    snapshot_files_state: TreeViewState,
+    snapshot_files_state: ListState,
     // Usecase UI states
     scan_snapshot_state: ScanSnapshotState,
     // Menu & settings
@@ -108,7 +108,7 @@ impl MyApp {
             first_frame: true,
             projects_state: ProjectsListState::default(),
             snapshots_state: SnapshotsListState::default(),
-            snapshot_files_state: TreeViewState::default(),
+            snapshot_files_state: ListState::default(),
             scan_snapshot_state: ScanSnapshotState::default(),
             saved_navbar_width_frac: saved_settings.navbar_width_frac,
             pending_nav_frac: None,

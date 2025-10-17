@@ -12,6 +12,12 @@ pub fn init_table(conn: &Connection) -> SqlResult<()> {
             path TEXT NOT NULL,
             size_bytes INTEGER NOT NULL,
             is_directory INTEGER NOT NULL,
+            file_extension TEXT,
+            crate_layer TEXT,
+            artifact_type TEXT,
+            artifact_id TEXT,
+            artifact_name TEXT,
+            role TEXT,
             FOREIGN KEY (snapshot_id) REFERENCES n002_snapshot(id),
             FOREIGN KEY (parent_id) REFERENCES n003_snapshot_file(id)
         )",
@@ -42,18 +48,39 @@ pub fn create(
     path: &str,
     size_bytes: i64,
     is_directory: bool,
+    file_extension: Option<&str>,
+    crate_layer: Option<&str>,
+    artifact_type: Option<&str>,
+    artifact_id: Option<&str>,
+    artifact_name: Option<&str>,
+    role: Option<&str>,
 ) -> SqlResult<i64> {
     conn.execute(
-        "INSERT INTO n003_snapshot_file (snapshot_id, parent_id, name, path, size_bytes, is_directory)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-        params![snapshot_id, parent_id, name, path, size_bytes, if is_directory { 1 } else { 0 }],
+        "INSERT INTO n003_snapshot_file (snapshot_id, parent_id, name, path, size_bytes, is_directory, 
+         file_extension, crate_layer, artifact_type, artifact_id, artifact_name, role)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+        params![
+            snapshot_id, 
+            parent_id, 
+            name, 
+            path, 
+            size_bytes, 
+            if is_directory { 1 } else { 0 },
+            file_extension,
+            crate_layer,
+            artifact_type,
+            artifact_id,
+            artifact_name,
+            role
+        ],
     )?;
     Ok(conn.last_insert_rowid())
 }
 
 pub fn list_by_snapshot(conn: &Connection, snapshot_id: i64) -> SqlResult<Vec<SnapshotFile>> {
     let mut stmt = conn.prepare(
-        "SELECT id, snapshot_id, parent_id, name, path, size_bytes, is_directory
+        "SELECT id, snapshot_id, parent_id, name, path, size_bytes, is_directory,
+         file_extension, crate_layer, artifact_type, artifact_id, artifact_name, role
          FROM n003_snapshot_file
          WHERE snapshot_id = ?1
          ORDER BY path",
@@ -68,6 +95,12 @@ pub fn list_by_snapshot(conn: &Connection, snapshot_id: i64) -> SqlResult<Vec<Sn
             row.get::<_, String>(4)?,
             row.get::<_, i64>(5)?,
             row.get::<_, i64>(6)? != 0,
+            row.get::<_, Option<String>>(7)?,
+            row.get::<_, Option<String>>(8)?,
+            row.get::<_, Option<String>>(9)?,
+            row.get::<_, Option<String>>(10)?,
+            row.get::<_, Option<String>>(11)?,
+            row.get::<_, Option<String>>(12)?,
         ))
     })?;
 
