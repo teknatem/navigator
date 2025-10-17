@@ -5,6 +5,7 @@ use rusqlite::{Connection, Result as SqlResult};
 use crate::app_settings::AppSettings;
 use crate::domain::n001_project::repository as project_repo;
 use crate::domain::n002_snapshot::repository as snapshot_repo;
+use crate::domain::n003_snapshot_file::repository as snapshot_file_repo;
 
 pub const DB_PATH: &str = "navigator.db";
 
@@ -48,11 +49,15 @@ pub fn init_database(conn: &Connection) -> SqlResult<()> {
 
     // Domain: n001_project aggregate table
     project_repo::init_table(conn)?;
-    // Domain: n002_snapshot aggregate table
-    snapshot_repo::init_table(conn)?;
     println!("  ✓ Table 'n001_project' initialized");
 
-        println!("  Table 'n002_snapshot' initialized");
+    // Domain: n002_snapshot aggregate table
+    snapshot_repo::init_table(conn)?;
+    println!("  ✓ Table 'n002_snapshot' initialized");
+
+    // Domain: n003_snapshot_file aggregate table
+    snapshot_file_repo::init_table(conn)?;
+    println!("  ✓ Table 'n003_snapshot_file' initialized");
 
     Ok(())
 }

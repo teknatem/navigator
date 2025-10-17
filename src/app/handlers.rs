@@ -29,13 +29,12 @@ impl crate::MyApp {
 
     pub fn handle_menu_actions(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         use crate::layout::menu_bar::{
-            AggregatesAction, EditAction, FileAction, HelpAction, SettingsAction, ViewAction,
+            AggregatesAction, EditAction, FileAction, HelpAction, SettingsAction, UseCasesAction,
+            ViewAction,
         };
 
-        if let Some(action) = self.menu_bar.file_action {
-            if let FileAction::Exit = action {
-                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-            }
+        if let Some(FileAction::Exit) = self.menu_bar.file_action {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
         }
 
         if let Some(action) = self.menu_bar.edit_action {
@@ -65,7 +64,11 @@ impl crate::MyApp {
             let current_zoom = ctx.zoom_factor();
             match action {
                 SettingsAction::OpenSettingsForm => {
-                    let current_theme = if ctx.style().visuals.dark_mode { Theme::Dark } else { Theme::Light };
+                    let current_theme = if ctx.style().visuals.dark_mode {
+                        Theme::Dark
+                    } else {
+                        Theme::Light
+                    };
                     self.settings_form.open(current_zoom, current_theme);
                     self.db_status = "Settings opened".to_string();
                 }
@@ -96,6 +99,19 @@ impl crate::MyApp {
                     self.open_snapshots_tab();
                     self.db_status = "Opened Snapshots tab".to_string();
                 }
+                AggregatesAction::SnapshotFiles => {
+                    self.open_snapshot_files_tab();
+                    self.db_status = "Opened Snapshot Files tab".to_string();
+                }
+            }
+        }
+
+        if let Some(action) = self.menu_bar.usecases_action {
+            match action {
+                UseCasesAction::ScanSnapshot => {
+                    self.open_scan_snapshot_tab();
+                    self.db_status = "Opened Scan Snapshot tab".to_string();
+                }
             }
         }
 
@@ -103,7 +119,8 @@ impl crate::MyApp {
             match action {
                 HelpAction::Documentation => self.db_status = "Действие: Документация".to_string(),
                 HelpAction::About => {
-                    self.db_status = "Navigator v0.1.0 - Rust egui + egui_dock + SQLite".to_string();
+                    self.db_status =
+                        "Navigator v0.1.0 - Rust egui + egui_dock + SQLite".to_string();
                 }
             }
         }
@@ -120,7 +137,11 @@ impl crate::MyApp {
             Theme::Dark => ctx.set_visuals(egui::Visuals::dark()),
         }
         ctx.set_zoom_factor(zoom);
-        self.db_status = format!("Settings loaded: Theme={:?}, Zoom={:.0}%", theme, zoom * 100.0);
+        self.db_status = format!(
+            "Settings loaded: Theme={:?}, Zoom={:.0}%",
+            theme,
+            zoom * 100.0
+        );
     }
 
     pub fn apply_and_save_settings(&mut self, ctx: &egui::Context) {
@@ -135,9 +156,17 @@ impl crate::MyApp {
 
         // Save all current settings
         let navbar_width_frac = self.settings_form.get_navbar_width_frac();
-        let app_settings = AppSettings { theme, zoom, navbar_width_frac };
+        let app_settings = AppSettings {
+            theme,
+            zoom,
+            navbar_width_frac,
+        };
         if app_settings.save_to_db(&self.db_connection).is_ok() {
-            self.db_status = format!("Settings saved: Theme={:?}, Zoom={:.0}%", theme, zoom * 100.0);
+            self.db_status = format!(
+                "Settings saved: Theme={:?}, Zoom={:.0}%",
+                theme,
+                zoom * 100.0
+            );
         }
     }
 }
