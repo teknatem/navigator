@@ -103,6 +103,10 @@ impl crate::MyApp {
                     self.open_snapshot_files_tab();
                     self.db_status = "Opened Snapshot Files tab".to_string();
                 }
+                AggregatesAction::SnapshotAggregates => {
+                    self.open_snapshot_aggregates_tab();
+                    self.db_status = "Opened Snapshot Aggregates tab".to_string();
+                }
             }
         }
 

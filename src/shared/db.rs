@@ -6,6 +6,7 @@ use crate::app_settings::AppSettings;
 use crate::domain::n001_project::repository as project_repo;
 use crate::domain::n002_snapshot::repository as snapshot_repo;
 use crate::domain::n003_snapshot_file::repository as snapshot_file_repo;
+use crate::domain::n004_snapshot_aggregate::repository as snapshot_aggregate_repo;
 
 pub const DB_PATH: &str = "navigator.db";
 
@@ -58,6 +59,10 @@ pub fn init_database(conn: &Connection) -> SqlResult<()> {
     // Domain: n003_snapshot_file aggregate table
     snapshot_file_repo::init_table(conn)?;
     println!("  ✓ Table 'n003_snapshot_file' initialized");
+
+    // Domain: n004_snapshot_aggregate aggregate table
+    snapshot_aggregate_repo::init_table(conn)?;
+    println!("  ✓ Table 'n004_snapshot_aggregate' initialized");
 
     Ok(())
 }

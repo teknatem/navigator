@@ -52,6 +52,7 @@ pub enum AggregatesAction {
     Projects,
     Snapshots,
     SnapshotFiles,
+    SnapshotAggregates,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -158,6 +159,10 @@ impl MenuBar {
             }
             if ui.button("Snapshot Files").clicked() {
                 self.aggregates_action = Some(AggregatesAction::SnapshotFiles);
+                ui.close_menu();
+            }
+            if ui.button("Snapshot Aggregates").clicked() {
+                self.aggregates_action = Some(AggregatesAction::SnapshotAggregates);
                 ui.close_menu();
             }
         });

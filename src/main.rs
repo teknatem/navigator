@@ -14,6 +14,7 @@ use app_settings::AppSettings;
 use domain::n001_project::ui::list::ProjectsListState;
 use domain::n002_snapshot::ui::list::SnapshotsListState;
 use domain::n003_snapshot_file::ui::list::ListState;
+use domain::n004_snapshot_aggregate::ui::list::ListState as AggregatesListState;
 use layout::{AppTab, CentralPanel, MenuBar, SettingsForm, SidePanel};
 use usecases::s501_create_snapshot::ScanSnapshotState;
 
@@ -44,6 +45,7 @@ struct MyApp {
     projects_state: ProjectsListState,
     snapshots_state: SnapshotsListState,
     snapshot_files_state: ListState,
+    snapshot_aggregates_state: AggregatesListState,
     // Usecase UI states
     scan_snapshot_state: ScanSnapshotState,
     // Menu & settings
@@ -68,6 +70,9 @@ impl MyApp {
     }
     fn open_snapshot_files_tab(&mut self) {
         self.open_or_focus(AppTab::SnapshotFiles);
+    }
+    fn open_snapshot_aggregates_tab(&mut self) {
+        self.open_or_focus(AppTab::SnapshotAggregates);
     }
     fn open_scan_snapshot_tab(&mut self) {
         self.open_or_focus(AppTab::ScanSnapshot);
@@ -109,6 +114,7 @@ impl MyApp {
             projects_state: ProjectsListState::default(),
             snapshots_state: SnapshotsListState::default(),
             snapshot_files_state: ListState::default(),
+            snapshot_aggregates_state: AggregatesListState::default(),
             scan_snapshot_state: ScanSnapshotState::default(),
             saved_navbar_width_frac: saved_settings.navbar_width_frac,
             pending_nav_frac: None,
@@ -175,6 +181,7 @@ impl eframe::App for MyApp {
                 &mut self.projects_state,
                 &mut self.snapshots_state,
                 &mut self.snapshot_files_state,
+                &mut self.snapshot_aggregates_state,
                 &mut self.scan_snapshot_state,
                 screen_w,
                 stored_frac,
@@ -226,6 +233,7 @@ impl eframe::App for MyApp {
             &mut self.projects_state,
             &mut self.snapshots_state,
             &mut self.snapshot_files_state,
+            &mut self.snapshot_aggregates_state,
             &mut self.scan_snapshot_state,
         );
     }
